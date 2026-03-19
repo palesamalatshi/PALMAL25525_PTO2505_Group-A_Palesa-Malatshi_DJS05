@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import SearchBar from "../Filters/SearchBar";
 import GenreFilter from "../Filters/GenreFilter";
-import SortSelect from "../Filters/SortSelect";
+import SortSelect from "../Filters/SortDropdown"; // ✅ FIXED
 import { PodcastContext } from "../../context/PodcastContext";
 
 function Header() {
