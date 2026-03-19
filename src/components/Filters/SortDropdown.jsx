@@ -1,0 +1,24 @@
+// src/components/Filters/SortDropDown.jsx
+import { useContext } from "react";
+import { SORT_OPTIONS, PodcastContext } from "../../context/PodcastContext";
+
+/**
+ * Dropdown for choosing sort order.
+ */
+export default function SortDropDown() {
+  const { sortKey, setSortKey } = useContext(PodcastContext);
+
+  return (
+    <select
+      className="controls-select" // using styles.css styling
+      value={sortKey}
+      onChange={(e) => setSortKey(e.target.value)}
+    >
+      {SORT_OPTIONS.map((o) => (
+        <option key={o.key} value={o.key}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  );
+}
