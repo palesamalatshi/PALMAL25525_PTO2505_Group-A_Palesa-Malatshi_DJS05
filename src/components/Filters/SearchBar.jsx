@@ -1,27 +1,27 @@
-// src/components/Filters/SearchBar.jsx
 import { useState, useEffect, useContext } from "react";
 import { PodcastContext } from "../../context/PodcastContext";
 
-/**
- * Search input with debounced update.
- */
-export default function SearchBar() {
+export default function SearchBar({ value, onChange, className }) {
   const { search, setSearch } = useContext(PodcastContext);
-  const [value, setValue] = useState(search || "");
+  const [inputValue, setInputValue] = useState(search || value || "");
 
   // Debounce input (300ms) to avoid rapid updates
   useEffect(() => {
-    const id = setTimeout(() => setSearch(value), 300);
-    return () => clearTimeout(id);
-  }, [value]);
+    const timeout = setTimeout(() => {
+      setSearch(inputValue);
+      if (onChange) onChange(inputValue);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [inputValue]);
 
   return (
     <input
       type="search"
-      placeholder="Search podcasts…"
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-      className="controls-select" // using existing styles.css styling
+      placeholder="Search podcasts..."
+      value={inputValue}
+      onChange={(e) => setInputValue(e.target.value)}
+      className={className || "controls-input"} // uses your styles.css
     />
   );
 }

@@ -1,27 +1,42 @@
-// src/components/UI/Header.jsx
 import { useContext } from "react";
 import SearchBar from "../Filters/SearchBar";
 import GenreFilter from "../Filters/GenreFilter";
-import SortDropDown from "../Filters/SortDropDown";
+import SortDropdown from "../Filters/SortDropdown"; // ✅ renamed
 import { PodcastContext } from "../../context/PodcastContext";
 
-/**
- * Header component with search, genre filter, and sort dropdown.
- */
-export default function Header() {
-  const { allGenres } = useContext(PodcastContext);
+function Header() {
+  const {
+    searchTerm,
+    setSearchTerm,
+    selectedGenre,
+    setSelectedGenre,
+    sortOption,
+    setSortOption,
+    allGenres,
+  } = useContext(PodcastContext);
 
   return (
     <header className="app-header">
       <h1>🎙️ UNMUTED Podcast App</h1>
 
       <div className="controls">
-        <SearchBar />
+        <SearchBar value={searchTerm} onChange={setSearchTerm} />
 
-        <GenreFilter genres={allGenres} />
+        <GenreFilter
+          genres={allGenres}
+          value={selectedGenre}
+          onChange={setSelectedGenre}
+          className="controls-select" // ✅ added
+        />
 
-        <SortDropDown />
+        <SortDropdown
+          value={sortOption}
+          onChange={setSortOption}
+          className="controls-select" // ✅ added
+        />
       </div>
     </header>
   );
 }
+
+export default Header;

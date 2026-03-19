@@ -74,9 +74,9 @@ body {
   flex-wrap: wrap;
 }
 
+/* ================= FILTER INPUTS ================= */
 .controls input,
-.controls select,
-.controls-select {
+.controls select {
   background: #222;
   border: 1px solid var(--border-soft);
   padding: 10px 14px;
@@ -91,8 +91,7 @@ body {
 }
 
 .controls input:focus,
-.controls select:focus,
-.controls-select:focus {
+.controls select:focus {
   outline: none;
   border-color: #555;
   box-shadow: 0 0 8px rgba(255,255,255,0.15);
@@ -227,8 +226,7 @@ body {
   }
 
   .controls input,
-  .controls select,
-  .controls-select {
+  .controls select {
     width: 100%;
   }
 
