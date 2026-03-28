@@ -1,9 +1,13 @@
-function Home() {
-  return (
-    <div>
-      <h1>Home Page</h1>
-    </div>
-  )
-}
+import Header from "../components/Header";
+import PodcastGrid from "../components/PodcastGrid";
+import Pagination from "../components/Pagination";
 
-export default Home
+export default function Home() {
+  return (
+    <div className="app">
+      <Header />
+      <PodcastGrid />
+      <Pagination />
+    </div>
+  );
+}

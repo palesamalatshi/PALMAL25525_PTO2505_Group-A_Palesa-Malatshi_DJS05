@@ -1,10 +1,11 @@
-import { useContext } from "react";
-import SearchBar from "../Filters/SearchBar";
-import GenreFilter from "../Filters/GenreFilter";
-import SortDropdown from "../Filters/SortDropdown"; // ✅ renamed
-import { PodcastContext } from "../../context/PodcastContext";
+import React, { useContext } from "react";
+import SearchBar from "./SearchBar";
+import GenreFilter from "./GenreFilter";
+import SortSelect from "./SortSelect";
+import { PodcastContext } from "../context/PodcastContext";
 
-function Header() {
+export default function Header() {
+
   const {
     searchTerm,
     setSearchTerm,
@@ -12,7 +13,7 @@ function Header() {
     setSelectedGenre,
     sortOption,
     setSortOption,
-    allGenres,
+    allGenres
   } = useContext(PodcastContext);
 
   return (
@@ -26,17 +27,13 @@ function Header() {
           genres={allGenres}
           value={selectedGenre}
           onChange={setSelectedGenre}
-          className="controls-select" // ✅ added
         />
 
-        <SortDropdown
+        <SortSelect
           value={sortOption}
           onChange={setSortOption}
-          className="controls-select" // ✅ added
         />
       </div>
     </header>
   );
 }
-
-export default Header;

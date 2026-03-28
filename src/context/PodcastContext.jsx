@@ -1,106 +1,115 @@
-// src/context/PodcastContext.jsx
-import { createContext, useEffect, useState } from "react";
-import { fetchPodcasts } from "../api/fetchData"; // make sure this path matches your file
+import React, { createContext, useState, useMemo } from "react";
 
-// Named export for the context
+/**
+ * Podcast context for sharing state across the application.
+ */
 export const PodcastContext = createContext();
 
-// Sorting options for SortDropDown
+/**
+ * Sorting options available in the application.
+ */
 export const SORT_OPTIONS = [
-  { key: "latest", label: "Latest" },
+  { key: "latest", label: "Newest" },
   { key: "oldest", label: "Oldest" },
-  { key: "az", label: "A → Z" },
-  { key: "za", label: "Z → A" },
+  { key: "az", label: "Title A → Z" },
+  { key: "za", label: "Title Z → A" }
 ];
 
 /**
- * PodcastProvider wraps the app and provides all global state:
- * - search (for SearchBar)
- * - genre (for GenreFilter)
- * - sortKey (for SortDropDown)
- * - paginated podcasts
- * - allGenres
+ * PodcastProvider manages global state for
+ * search, sorting, filtering and pagination.
+ *
+ * @param {{children: React.ReactNode, podcasts: Array}} props
  */
-export function PodcastProvider({ children }) {
-  const [allPodcasts, setAllPodcasts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export function PodcastProvider({ children, podcasts }) {
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedGenre, setSelectedGenre] = useState("all");
+  const [selectedGenre, setSelectedGenre] = useState("All");
   const [sortOption, setSortOption] = useState("latest");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(8);
-  const [allGenres, setAllGenres] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch podcasts on mount
-  useEffect(() => {
-    fetchPodcasts(setAllPodcasts, setError, setLoading);
-  }, []);
+  const itemsPerPage = 8;
 
-  // Extract genres once podcasts load
-  useEffect(() => {
-    const genresSet = new Set();
-    allPodcasts.forEach((p) => {
-      if (p.genres) p.genres.forEach((g) => genresSet.add(g));
-    });
-    setAllGenres(["all", ...Array.from(genresSet)]);
-  }, [allPodcasts]);
+  /**
+   * Extract unique genres from podcasts
+   */
+  const allGenres = useMemo(() => {
+    const genres = podcasts.flatMap((p) => p.genreNames || []);
+    return ["All", ...new Set(genres)];
+  }, [podcasts]);
 
-  // Reset page on filters
-  useEffect(() => {
-    setPage(1);
+  /**
+   * Apply search, filter and sorting
+   */
+  const filteredPodcasts = useMemo(() => {
+    let result = [...podcasts];
+
+    if (searchTerm) {
+      result = result.filter((p) =>
+        p.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedGenre !== "All") {
+      result = result.filter((p) =>
+        p.genreNames?.includes(selectedGenre)
+      );
+    }
+
+    if (sortOption === "latest") {
+      result.sort((a, b) => new Date(b.updated) - new Date(a.updated));
+    }
+
+    if (sortOption === "oldest") {
+      result.sort((a, b) => new Date(a.updated) - new Date(b.updated));
+    }
+
+    if (sortOption === "az") {
+      result.sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    if (sortOption === "za") {
+      result.sort((a, b) => b.title.localeCompare(a.title));
+    }
+
+    return result;
+
+  }, [podcasts, searchTerm, selectedGenre, sortOption]);
+
+  /**
+   * Pagination
+   */
+  const totalPages = Math.ceil(filteredPodcasts.length / itemsPerPage);
+
+  const paginatedPodcasts = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredPodcasts.slice(start, start + itemsPerPage);
+  }, [filteredPodcasts, currentPage]);
+
+  /**
+   * Reset page when filters change
+   */
+  React.useEffect(() => {
+    setCurrentPage(1);
   }, [searchTerm, selectedGenre, sortOption]);
 
-  // Apply filters, sort
-  const filteredPodcasts = allPodcasts
-    .filter((p) =>
-      p.title.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter((p) =>
-      selectedGenre === "all" ? true : p.genres?.includes(selectedGenre)
-    )
-    .sort((a, b) => {
-      switch (sortOption) {
-        case "latest":
-          return new Date(b.updated) - new Date(a.updated);
-        case "oldest":
-          return new Date(a.updated) - new Date(b.updated);
-        case "az":
-          return a.title.localeCompare(b.title);
-        case "za":
-          return b.title.localeCompare(a.title);
-        default:
-          return 0;
-      }
-    });
-
-  // Pagination
-  const totalPages = Math.max(1, Math.ceil(filteredPodcasts.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const paginatedPodcasts = filteredPodcasts.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
-
   const value = {
-    loading,
-    error,
     searchTerm,
     setSearchTerm,
     selectedGenre,
     setSelectedGenre,
     sortOption,
     setSortOption,
-    page: currentPage,
-    setPage,
-    pageSize,
+    currentPage,
+    setCurrentPage,
     totalPages,
     podcasts: paginatedPodcasts,
-    allPodcastsCount: filteredPodcasts.length,
-    allGenres,
-    allPodcasts, // useful for detail pages
+    allGenres
   };
 
-  return <PodcastContext.Provider value={value}>{children}</PodcastContext.Provider>;
+  return (
+    <PodcastContext.Provider value={value}>
+      {children}
+    </PodcastContext.Provider>
+  );
 }
